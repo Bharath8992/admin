@@ -1,0 +1,291 @@
+{% extends 'base.html' %}
+
+{% block title %}AdminHub - Billing{% endblock %}
+
+{% block extra_css %}
+<style>
+.services-list {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    min-height: 100px;
+    background-color: #f8f9fa;
+}
+
+.service-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 8px;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.service-info {
+    flex-grow: 1;
+}
+
+.service-name {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.service-details {
+    font-size: 0.9em;
+    color: #666;
+}
+
+.service-total {
+    font-weight: 600;
+    color: #28a745;
+    margin-right: 15px;
+}
+
+.remove-service {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.remove-service:hover {
+    background: #c82333;
+}
+
+.bill-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.bill-total {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 0;
+    font-size: 1.3em;
+    font-weight: 600;
+    border-top: 2px solid #007bff;
+    margin-top: 10px;
+    color: #2c3e50;
+}
+
+.bill-actions {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.customer-info, .service-selection, .selected-services, .billing-summary {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    margin-bottom: 20px;
+}
+
+.alert {
+    margin-bottom: 20px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="logo-circle">AH</div>
+            <h4>AdminHub</h4>
+        </div>
+        <ul class="nav-list">
+            <li><a href="{% url 'dashboard' %}" class="nav-link-compact"><i class="fa fa-layer-group"></i> Dashboard</a></li>
+            <li><a href="{% url 'billing:billing' %}" class="nav-link-compact active"><i class="fa fa-receipt"></i> Billing</a></li>
+            <li><a href="{% url 'services:service_list' %}" class="nav-link-compact"><i class="fa fa-concierge-bell"></i> Services</a></li>
+            <li><a href="{% url 'membership' %}" class="nav-link-compact"><i class="fa fa-crown"></i> Membership</a></li>
+            <li><a href="" class="nav-link-compact"><i class="fa fa-whatsapp"></i> WhatsApp Ads</a></li>
+            <li><a href="#" class="nav-link-compact"><i class="fa fa-chart-line"></i> Analytics</a></li>
+            <li><a href="#" class="nav-link-compact"><i class="fa fa-cog"></i> Settings</a></li>
+        </ul>
+
+        <span class="small-muted">Account</span>
+        <ul class="nav-list">
+            <li><a href="{% url 'login' %}" class="nav-link-compact"><i class="fa fa-sign-in"></i> Login</a></li>
+            <li><a href="{% url 'register' %}" class="nav-link-compact"><i class="fa fa-user-plus"></i> Register</a></li>
+            <li><a href="{% url 'forgot_password' %}" class="nav-link-compact"><i class="fa fa-key"></i> Forgot Password</a></li>
+        </ul>
+        <a href="{% url 'logout' %}" class="logout" id="logoutBtn"><i class="fa fa-power-off"></i> Logout</a>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="panel">
+        <header class="topbar">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <button id="toggleSidebar" class="btn btn-outline-secondary d-lg-none"><i class="fa fa-bars"></i></button>
+                <div class="searchbox">
+                    <i class="fa fa-search text-muted"></i>
+                    <input type="text" placeholder="Search..." />
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <div class="avatar">{{ user.username|slice:":2"|upper }}</div>
+            </div>
+        </header>
+
+        <section class="billing-section">
+            <div class="dashboard-title">
+                <h1>Billing</h1>
+                <div class="breadcrumb">Dashboard &nbsp;›&nbsp; Billing</div>
+                <div class="header-actions">
+                    <a href="{% url 'billing:bill_history' %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fa fa-history"></i> Bill History
+                    </a>
+                    <a href="{% url 'services:service_list' %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fa fa-cog"></i> Manage Services
+                    </a>
+                </div>
+            </div>
+
+            <!-- Display Messages -->
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="billing-container">
+                <h2 class="mb-4">Generate Bill</h2>
+
+                <!-- SINGLE FORM START -->
+                <form method="post">
+                    {% csrf_token %}
+
+                    <!-- Customer Information -->
+                    <div class="customer-info mb-4">
+                        <h5>Customer Information</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="form-label">Mobile Number *</label>
+                                {{ customer_form.mobile }}
+                                <button type="submit" name="check_customer" class="btn btn-sm btn-outline-primary mt-2">
+                                    Check Customer
+                                </button>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Customer Name *</label>
+                                {{ customer_form.name }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Email</label>
+                                {{ customer_form.email }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Service Selection -->
+                    <div class="service-selection mb-4">
+                        <h5>Select Services</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="form-label">Category</label>
+                                {{ service_form.category }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Service</label>
+                                {{ service_form.service }}
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Quantity</label>
+                                {{ service_form.quantity }}
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="submit" name="add_service" class="btn btn-success w-100">
+                                    Add Service
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Selected Services -->
+                    <div class="selected-services mb-4">
+                        <h5>Selected Services</h5>
+                        <div class="services-list">
+                            {% if selected_services %}
+                                {% for service in selected_services %}
+                                <div class="service-item">
+                                    <div class="service-info">
+                                        <div class="service-name">{{ service.name }}</div>
+                                        <div class="service-details">
+                                            ₹{{ service.price }} × {{ service.quantity }}
+                                        </div>
+                                    </div>
+                                    <div class="service-total">
+                                        ₹{% widthratio service.price 1 service.quantity %}
+                                    </div>
+                                    <button type="submit" name="remove_service" value="{{ forloop.counter0 }}" class="remove-service">
+                                        Remove
+                                    </button>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-muted text-center py-4">
+                                    No services added yet. Select services from above.
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Billing Summary -->
+                    <div class="billing-summary">
+                        <h4 class="mb-3">Billing Summary</h4>
+                        <div class="bill-item">
+                            <span>Subtotal:</span>
+                            <span>₹{{ subtotal|floatformat:2 }}</span>
+                        </div>
+                        <div class="bill-item">
+                            <span>Tax (5%):</span>
+                            <span>₹{{ tax_amount|floatformat:2 }}</span>
+                        </div>
+                        <div class="bill-item">
+                            <span>Discount:</span>
+                            <span>₹0.00</span>
+                        </div>
+                        <div class="bill-total">
+                            <span>Total Amount:</span>
+                            <span>₹{{ total_amount|floatformat:2 }}</span>
+                        </div>
+
+                        <div class="bill-actions mt-4">
+                            {% if selected_services %}
+                            <button type="submit" name="generate_bill" class="btn btn-success btn-lg">
+                                Generate Bill
+                            </button>
+                            {% else %}
+                            <button type="button" class="btn btn-success btn-lg" disabled>
+                                Generate Bill
+                            </button>
+                            {% endif %}
+
+                            <button type="submit" name="new_bill" class="btn btn-outline-secondary mt-3">
+                                <i class="fa fa-plus"></i> New Bill
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                <!-- SINGLE FORM END -->
+            </div>
+        </section>
+    </main>
+</div>
+{% endblock %}

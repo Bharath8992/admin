@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}AdminHub - Bill Generated{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-download PDF when page loads
+window.onload = function() {
+    console.log("Auto-downloading PDF...");
+    // Open PDF download in new tab
+    window.open('{% url "billing:download_pdf" bill.id %}', '_blank');
+};
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="logo-circle">AH</div>
+            <h4>AdminHub</h4>
+        </div>
+        <ul class="nav-list">
+            <li><a href="{% url 'dashboard' %}" class="nav-link-compact"><i class="fa fa-layer-group"></i> Dashboard</a></li>
+            <li><a href="{% url 'billing:billing' %}" class="nav-link-compact"><i class="fa fa-receipt"></i> Billing</a></li>
+            <li><a href="{% url 'services:service_list' %}" class="nav-link-compact"><i class="fa fa-concierge-bell"></i> Services</a></li>
+            <li><a href="{% url 'membership' %}" class="nav-link-compact"><i class="fa fa-crown"></i> Membership</a></li>
+            <li><a href="" class="nav-link-compact"><i class="fa fa-whatsapp"></i> WhatsApp Ads</a></li>
+            <li><a href="#" class="nav-link-compact"><i class="fa fa-chart-line"></i> Analytics</a></li>
+            <li><a href="#" class="nav-link-compact"><i class="fa fa-cog"></i> Settings</a></li>
+        </ul>
+
+        <span class="small-muted">Account</span>
+        <ul class="nav-list">
+            <li><a href="{% url 'login' %}" class="nav-link-compact"><i class="fa fa-sign-in"></i> Login</a></li>
+            <li><a href="{% url 'register' %}" class="nav-link-compact"><i class="fa fa-user-plus"></i> Register</a></li>
+            <li><a href="{% url 'forgot_password' %}" class="nav-link-compact"><i class="fa fa-key"></i> Forgot Password</a></li>
+        </ul>
+        <a href="{% url 'logout' %}" class="logout" id="logoutBtn"><i class="fa fa-power-off"></i> Logout</a>
+    </aside>
+
+    <main class="panel">
+        <header class="topbar">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <button id="toggleSidebar" class="btn btn-outline-secondary d-lg-none"><i class="fa fa-bars"></i></button>
+                <div class="searchbox">
+                    <i class="fa fa-search text-muted"></i>
+                    <input type="text" placeholder="Search..." />
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <div class="avatar">{{ user.username|slice:":2"|upper }}</div>
+            </div>
+        </header>
+
+        <section class="content-section">
+            <div class="dashboard-title">
+                <h1>Bill Generated Successfully</h1>
+                <div class="breadcrumb">Dashboard &nbsp;›&nbsp; Billing &nbsp;›&nbsp; Success</div>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">Bill Generated</h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="mb-4">
+                                <i class="fa fa-check-circle text-success" style="font-size: 4rem;"></i>
+                            </div>
+                            <h4 class="text-success mb-3">Bill Generated Successfully!</h4>
+                            <p class="lead">Bill Number: <strong>{{ bill.bill_number }}</strong></p>
+                            <p>Customer: <strong>{{ bill.customer.name }}</strong></p>
+                            <p>Total Amount: <strong>₹{{ bill.total_amount|floatformat:2 }}</strong></p>
+                            <p>Date: <strong>{{ bill.created_at|date:"d M Y, h:i A" }}</strong></p>
+                            
+                            <div class="alert alert-info mt-3">
+                                <i class="fa fa-info-circle"></i>
+                                PDF download should start automatically. If not, use the buttons below.
+                            </div>
+                            
+                            <div class="mt-4">
+                                <a href="{% url 'billing:download_pdf' bill.id %}" class="btn btn-primary me-2" target="_blank">
+                                    <i class="fa fa-download"></i> Download PDF
+                                </a>
+                                <a href="{% url 'billing:share_whatsapp' bill.id %}" class="btn btn-warning me-2">
+                                    <i class="fa fa-whatsapp"></i> Share via WhatsApp
+                                </a>
+                                <a href="{% url 'billing:billing' %}" class="btn btn-outline-secondary">
+                                    <i class="fa fa-plus"></i> New Bill
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+{% endblock %}

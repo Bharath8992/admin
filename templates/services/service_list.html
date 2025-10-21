@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}AdminHub - Services{% endblock %}
+
+{% block content %}
+<div class="container-fluid app">
+    <aside class="sidebar">
+        <!-- Your sidebar code -->
+    </aside>
+
+    <main class="panel">
+        <header class="topbar">
+            <!-- Your header code -->
+        </header>
+
+        <section class="content-section">
+            <div class="dashboard-title">
+                <h1>Services Management</h1>
+                <div class="breadcrumb">Dashboard &nbsp;›&nbsp; Services</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">All Services</h5>
+                    <div>
+                        <a href="{% url 'services:category_list' %}" class="btn btn-outline-primary btn-sm me-2">
+                            <i class="fa fa-list"></i> Categories
+                        </a>
+                        <a href="{% url 'services:service_create' %}" class="btn btn-primary btn-sm">
+                            <i class="fa fa-plus"></i> Add Service
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if services %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Category</th>
+                                    <th>Price</th>
+                                    <th>Duration</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for service in services %}
+                                <tr>
+                                    <td>{{ service.name }}</td>
+                                    <td>{{ service.category.name }}</td>
+                                    <td>₹{{ service.price }}</td>
+                                    <td>{{ service.duration|default:"-" }}</td>
+                                    <td>
+                                        {% if service.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'services:service_edit' service.pk %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fa fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'services:service_delete' service.pk %}" class="btn btn-sm btn-outline-danger">
+                                            <i class="fa fa-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <p class="text-muted">No services found.</p>
+                        <a href="{% url 'services:service_create' %}" class="btn btn-primary">Add First Service</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+{% endblock %}

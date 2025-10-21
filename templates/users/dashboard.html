@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %}WhatsApp Ads Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="dashboard-title">
+        <h1>WhatsApp Ads Dashboard</h1>
+        <div class="breadcrumb">Dashboard &nbsp;›&nbsp; WhatsApp Ads</div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="card-title">Total Users</h5>
+                            <h2 class="text-primary">{{ total_users }}</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fa fa-users fa-2x text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="card-title">Active Memberships</h5>
+                            <h2 class="text-success">{{ active_memberships }}</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fa fa-crown fa-2x text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="card-title">Your Campaigns</h5>
+                            <h2 class="text-info">{{ total_campaigns }}</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fa fa-bullhorn fa-2x text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'whatsapp_ads:user_create' %}" class="btn btn-primary w-100">
+                                <i class="fa fa-user-plus"></i> Add User
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'whatsapp_ads:ad_create' %}" class="btn btn-success w-100">
+                                <i class="fa fa-plus"></i> Create Ad
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'whatsapp_ads:template_list' %}" class="btn btn-info w-100">
+                                <i class="fa fa-palette"></i> Use Template
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'whatsapp_ads:membership_list' %}" class="btn btn-warning w-100">
+                                <i class="fa fa-crown"></i> Manage Memberships
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Campaigns -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Campaigns</h5>
+                    <a href="{% url 'whatsapp_ads:ad_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    {% if recent_campaigns %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for campaign in recent_campaigns %}
+                                <tr>
+                                    <td>{{ campaign.title }}</td>
+                                    <td>
+                                        <span class="badge bg-info">{{ campaign.get_ad_type_display }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{% if campaign.status == 'active' %}success{% elif campaign.status == 'draft' %}secondary{% else %}warning{% endif %}">
+                                            {{ campaign.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ campaign.created_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        <a href="{% url 'whatsapp_ads:send_ad' campaign.id %}" class="btn btn-sm btn-success">
+                                            <i class="fa fa-paper-plane"></i>
+                                        </a>
+                                        <a href="{% url 'whatsapp_ads:ad_edit' campaign.id %}" class="btn btn-sm btn-primary">
+                                            <i class="fa fa-edit"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center">No campaigns yet. <a href="{% url 'whatsapp_ads:ad_create' %}">Create your first campaign</a></p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.stat-card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+</style>
+{% endblock %}
