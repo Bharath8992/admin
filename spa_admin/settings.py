@@ -25,7 +25,7 @@ INSTALLED_APPS = [
     'membership',
     'services',
     'whatsapp_ads',
-    'deep',
+    
     # 'whatsapp',
 ]
 

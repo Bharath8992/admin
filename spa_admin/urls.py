@@ -22,7 +22,7 @@ urlpatterns = [
     path('', include('accounts.urls')),
     # path('billing/', include('billing.urls')),
     path('membership/', include('membership.urls')),
-    path('deep/', include('deep.urls')),
+    # path('deep/', include('deep.urls')),
     path('billing/', include('billing.urls', namespace='billing')),
     path('services/', include('services.urls', namespace='services')),
     path('whatsapp-ads/', include('whatsapp_ads.urls', namespace='whatsapp_ads')),
