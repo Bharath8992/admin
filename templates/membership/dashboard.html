@@ -1,0 +1,144 @@
+{% extends 'membership/base.html' %}
+
+{% block title %}Dashboard - Membership Management{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        <div class="card stats-card text-white bg-primary mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Total Members</h5>
+                <h2 class="card-text">{{ total_members }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stats-card text-white bg-success mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Active Members</h5>
+                <h2 class="card-text">{{ active_members }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stats-card text-white bg-danger mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Expired Members</h5>
+                <h2 class="card-text">{{ expired_members }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stats-card text-white bg-warning mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Total Revenue</h5>
+                <h2 class="card-text">${{ total_revenue }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Membership Types</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-3">
+                        <div class="border rounded p-3">
+                            <h6 class="text-primary">Basic</h6>
+                            <h4>{{ basic_count }}</h4>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="border rounded p-3">
+                            <h6 class="text-info">Premium</h6>
+                            <h4>{{ premium_count }}</h4>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="border rounded p-3">
+                            <h6 class="text-warning">Gold</h6>
+                            <h4>{{ gold_count }}</h4>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="border rounded p-3">
+                            <h6 class="text-success">Platinum</h6>
+                            <h4>{{ platinum_count }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Recent Memberships</h5>
+                <a href="{% url 'membership:list' %}" class="btn btn-primary btn-sm">View All</a>
+            </div>
+            <div class="card-body">
+                {% if recent_memberships %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for membership in recent_memberships %}
+                                <tr>
+                                    <td>{{ membership.full_name }}</td>
+                                    <td>
+                                        <span class="badge bg-info">{{ membership.get_membership_type_display }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge {% if membership.status == 'active' %}bg-success{% else %}bg-secondary{% endif %}">
+                                            {{ membership.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>${{ membership.price }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No memberships found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <a href="{% url 'membership:create' %}" class="btn btn-success w-100 mb-2">Add New Membership</a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="{% url 'membership:list' %}" class="btn btn-primary w-100 mb-2">View All Memberships</a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="{% url 'membership:list' %}?status=active" class="btn btn-warning w-100 mb-2">View Active Members</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

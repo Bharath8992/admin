@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}
+AdminHub - Membership Details
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="logo-circle">AH</div>
+            <h4>AdminHub</h4>
+        </div>
+        <ul class="nav-list">
+            <li><a href="{% url 'dashboard' %}" class="nav-link-compact"><i class="fa fa-layer-group"></i> Dashboard</a></li>
+            <li><a href="{% url 'billing:billing' %}" class="nav-link-compact"><i class="fa fa-receipt"></i> Billing</a></li>
+            <li><a href="{% url 'services:service_list' %}" class="nav-link-compact"><i class="fa fa-concierge-bell"></i> Services</a></li>
+            <li><a href="{% url 'membership_list' %}" class="nav-link-compact active"><i class="fa fa-crown"></i> Membership</a></li>
+            <li><a href="#" class="nav-link-compact"><i class="fa fa-whatsapp"></i> WhatsApp Ads</a></li>
+            <li><a href="#" class="nav-link-compact"><i class="fa fa-chart-line"></i> Analytics</a></li>
+            <li><a href="#" class="nav-link-compact"><i class="fa fa-cog"></i> Settings</a></li>
+        </ul>
+
+        <span class="small-muted">Account</span>
+        <ul class="nav-list">
+            <li><a href="{% url 'login' %}" class="nav-link-compact"><i class="fa fa-sign-in"></i> Login</a></li>
+            <li><a href="{% url 'register' %}" class="nav-link-compact"><i class="fa fa-user-plus"></i> Register</a></li>
+            <li><a href="{% url 'forgot_password' %}" class="nav-link-compact"><i class="fa fa-key"></i> Forgot Password</a></li>
+        </ul>
+        <a href="{% url 'logout' %}" class="logout" id="logoutBtn"><i class="fa fa-power-off"></i> Logout</a>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="container mt-5">
+  <div class="card shadow-lg border-0 rounded-4">
+    <div class="card-header bg-gradient text-white text-center py-3" style="background: linear-gradient(90deg, #007bff, #6610f2);">
+      <h3 class="mb-0"><i class="bi bi-person-badge me-2"></i>Membership Details</h3>
+    </div>
+
+    <div class="card-body p-4">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <p><i class="bi bi-person-fill text-primary me-2"></i><strong>Name:</strong> {{ membership.full_name }}</p>
+          <p><i class="bi bi-envelope-fill text-primary me-2"></i><strong>Email:</strong> {{ membership.email }}</p>
+          <p><i class="bi bi-telephone-fill text-primary me-2"></i><strong>Phone:</strong> {{ membership.phone }}</p>
+        </div>
+        <div class="col-md-6">
+          <p><i class="bi bi-card-checklist text-primary me-2"></i><strong>Membership Type:</strong> {{ membership.get_membership_type_display }}</p>
+          <p><i class="bi bi-check-circle-fill text-primary me-2"></i><strong>Status:</strong> {{ membership.status }}</p>
+          <p><i class="bi bi-calendar-event-fill text-primary me-2"></i><strong>Start Date:</strong> {{ membership.start_date }}</p>
+          <p><i class="bi bi-calendar-x-fill text-primary me-2"></i><strong>End Date:</strong> {{ membership.end_date }}</p>
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+      <div class="text-center">
+        <h4 class="text-success fw-bold"><i class="bi bi-currency-rupee"></i>{{ membership.price }}</h4>
+      </div>
+    </div>
+
+    <div class="card-footer bg-light text-center py-3">
+      <a href="{% url 'membership_edit' membership.id %}" class="btn btn-warning me-2">
+        <i class="bi bi-pencil-square me-1"></i>Edit
+      </a>
+      <a href="{% url 'membership_list' %}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left-circle me-1"></i>Back
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap Icons CDN -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+</div>
+{% endblock %}

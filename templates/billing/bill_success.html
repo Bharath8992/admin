@@ -25,7 +25,7 @@ window.onload = function() {
             <li><a href="{% url 'dashboard' %}" class="nav-link-compact"><i class="fa fa-layer-group"></i> Dashboard</a></li>
             <li><a href="{% url 'billing:billing' %}" class="nav-link-compact"><i class="fa fa-receipt"></i> Billing</a></li>
             <li><a href="{% url 'services:service_list' %}" class="nav-link-compact"><i class="fa fa-concierge-bell"></i> Services</a></li>
-            <li><a href="{% url 'membership' %}" class="nav-link-compact"><i class="fa fa-crown"></i> Membership</a></li>
+            <li><a href="{% url 'membership_list' %}" class="nav-link-compact"><i class="fa fa-crown"></i> Membership</a></li>
             <li><a href="" class="nav-link-compact"><i class="fa fa-whatsapp"></i> WhatsApp Ads</a></li>
             <li><a href="#" class="nav-link-compact"><i class="fa fa-chart-line"></i> Analytics</a></li>
             <li><a href="#" class="nav-link-compact"><i class="fa fa-cog"></i> Settings</a></li>
@@ -85,9 +85,9 @@ window.onload = function() {
                                 <a href="{% url 'billing:download_pdf' bill.id %}" class="btn btn-primary me-2" target="_blank">
                                     <i class="fa fa-download"></i> Download PDF
                                 </a>
-                                <a href="{% url 'billing:share_whatsapp' bill.id %}" class="btn btn-warning me-2">
+                                {% comment %} <a href="{% url 'billing:share_whatsapp' bill.id %}" class="btn btn-warning me-2">
                                     <i class="fa fa-whatsapp"></i> Share via WhatsApp
-                                </a>
+                                </a> {% endcomment %}
                                 <a href="{% url 'billing:billing' %}" class="btn btn-outline-secondary">
                                     <i class="fa fa-plus"></i> New Bill
                                 </a>

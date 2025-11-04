@@ -1,45 +1,36 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
+from django.urls import reverse_lazy
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from .models import Membership
 from .forms import MembershipForm
 
-@login_required
-def membership_list(request):
-    memberships = Membership.objects.select_related('user').all()
-    return render(request, 'membership/membership_list.html', {
-        'memberships': memberships,
-        'user': request.user,  # logged-in user info
-    })
+# List all memberships
+class MembershipListView(ListView):
+    model = Membership
+    template_name = 'membership/membership_list.html'
+    context_object_name = 'memberships'
 
-@login_required
-def membership_create(request):
-    if request.method == 'POST':
-        form = MembershipForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Membership added successfully!")
-            return redirect('membership')
-    else:
-        form = MembershipForm()
-    return render(request, 'membership/membership_form.html', {'form': form, 'title': 'Add Member'})
+# Create new membership
+class MembershipCreateView(CreateView):
+    model = Membership
+    form_class = MembershipForm
+    template_name = 'membership/membership_form.html'
+    success_url = reverse_lazy('membership_list')
 
-@login_required
-def membership_edit(request, pk):
-    membership = get_object_or_404(Membership, pk=pk)
-    if request.method == 'POST':
-        form = MembershipForm(request.POST, instance=membership)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Membership updated successfully!")
-            return redirect('membership')
-    else:
-        form = MembershipForm(instance=membership)
-    return render(request, 'membership/membership_form.html', {'form': form, 'title': 'Edit Member'})
+# Update existing membership
+class MembershipUpdateView(UpdateView):
+    model = Membership
+    form_class = MembershipForm
+    template_name = 'membership/membership_form.html'
+    success_url = reverse_lazy('membership_list')
 
-@login_required
-def membership_delete(request, pk):
-    membership = get_object_or_404(Membership, pk=pk)
-    membership.delete()
-    messages.success(request, "Membership deleted successfully!")
-    return redirect('membership')
+# Delete membership
+class MembershipDeleteView(DeleteView):
+    model = Membership
+    template_name = 'membership/membership_confirm_delete.html'
+    success_url = reverse_lazy('membership_list')
+
+# View membership details
+class MembershipDetailView(DetailView):
+    model = Membership
+    template_name = 'membership/membership_detail.html'
+    context_object_name = 'membership'

@@ -387,7 +387,7 @@ def download_pdf(request, bill_id):
         return redirect('billing:billing')
 
 @login_required
-def share_whatsapp(request, bill_id):
+def shae_whatsapp(request, bill_id):
     try:
         bill = Bill.objects.get(id=bill_id)
         
@@ -428,6 +428,63 @@ Thank you for your business! 🎉
     except Bill.DoesNotExist:
         messages.error(request, 'Bill not found')
         return redirect('billing:billing')
+
+
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
+from django.http import HttpResponse
+from django.contrib import messages
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
+from django.conf import settings
+import urllib.parse
+
+@login_required
+def share_whatsapp(request, bill_id):
+    try:
+        bill = Bill.objects.get(id=bill_id)
+
+        # ✅ Generate the same PDF as your download function
+        pdf_buffer = generate_pdf(bill)
+
+        # ✅ Save it temporarily to media/bills/
+        filename = f"bill_{bill.bill_number}.pdf"
+        pdf_path = f"bills/{filename}"
+        default_storage.save(pdf_path, ContentFile(pdf_buffer.getvalue()))
+
+        # ✅ Create full URL to the saved PDF
+        pdf_url = request.build_absolute_uri(f"{settings.MEDIA_URL}{pdf_path}")
+
+        # ✅ Prepare WhatsApp message with the link
+        message = f"""
+*CURA SPA & WELLNESS - Bill Details*
+
+Dear {bill.customer.name},
+
+Your bill has been generated successfully. You can download it below:
+{pdf_url}
+
+*Bill Number:* {bill.bill_number}
+*Total Amount:* ₹{bill.total_amount}
+*Date:* {bill.created_at.strftime('%d-%m-%Y %H:%M')}
+
+Thank you for choosing CURA SPA & WELLNESS 💆‍♀️💆‍♂️
+"""
+
+        # ✅ Encode and redirect to WhatsApp
+        encoded_message = urllib.parse.quote(message)
+        whatsapp_url = f"https://wa.me/?text={encoded_message}"
+        return redirect(whatsapp_url)
+
+    except Bill.DoesNotExist:
+        messages.error(request, 'Bill not found')
+        return redirect('billing:billing')
+    except Exception as e:
+        messages.error(request, f'Error sharing PDF: {str(e)}')
+        return redirect('billing:billing')
+
+
 
 @login_required
 def bill_history(request):

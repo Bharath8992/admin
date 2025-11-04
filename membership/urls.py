@@ -1,9 +1,13 @@
 from django.urls import path
-from . import views
+from .views import (
+    MembershipListView, MembershipCreateView, MembershipUpdateView,
+    MembershipDeleteView, MembershipDetailView
+)
 
 urlpatterns = [
-    path('', views.membership_list, name='membership'),
-    path('add/', views.membership_create, name='membership_add'),
-    path('<int:pk>/edit/', views.membership_edit, name='membership_edit'),
-    path('<int:pk>/delete/', views.membership_delete, name='membership_delete'),
+    path('', MembershipListView.as_view(), name='membership_list'),
+    path('add/', MembershipCreateView.as_view(), name='membership_add'),
+    path('<int:pk>/edit/', MembershipUpdateView.as_view(), name='membership_edit'),
+    path('<int:pk>/delete/', MembershipDeleteView.as_view(), name='membership_delete'),
+    path('<int:pk>/', MembershipDetailView.as_view(), name='membership_detail'),
 ]

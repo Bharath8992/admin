@@ -1,13 +1,9 @@
+# accounts/models.py
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 class CustomUser(AbstractUser):
     phone = models.CharField(max_length=15, blank=True)
-    membership_type = models.CharField(
-        max_length=20, 
-        choices=[('basic', 'Basic'), ('premium', 'Premium'), ('vip', 'VIP')],
-        default='basic'
-    )
     
     # Add related_name to avoid clashes
     groups = models.ManyToManyField(

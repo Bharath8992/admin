@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #fff;
+    }
+    .invoice-container {
+      width: 90%;
+      margin: auto;
+      border: 1px solid #ddd;
+      padding: 20px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      background: #0b1523;
+      color: white;
+      padding: 20px;
+    }
+    .header .right {
+      text-align: right;
+      color: #ffb000;
+    }
+    .section {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .section .box {
+      width: 48%;
+      background: #f8f8f8;
+      padding: 10px 15px;
+      border-left: 4px solid #ffb000;
+    }
+    h3 {
+      margin: 5px 0;
+      color: #333;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 25px;
+    }
+    th {
+      background: #ffb000;
+      color: white;
+      padding: 10px;
+      text-align: left;
+    }
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+    .totals {
+      text-align: right;
+      margin-top: 20px;
+    }
+    .totals div {
+      margin: 5px 0;
+    }
+    .footer {
+      margin-top: 40px;
+      font-size: 12px;
+      text-align: center;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="invoice-container">
+    <div class="header">
+      <div>
+        <h2>YOUR LOGO</h2>
+        <p>Slogan or tagline</p>
+      </div>
+      <div class="right">
+        <h2>INVOICE</h2>
+        <p>ID No: {{ bill.bill_number }}</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="box">
+        <h3>Invoice To:</h3>
+        <p><strong>{{ bill.customer.name }}</strong><br>
+        {{ bill.customer.email }}<br>
+        {{ bill.customer.mobile }}</p>
+      </div>
+
+      <div class="box">
+        <h3>Invoice From:</h3>
+        <p><strong>Cura Therapy Centre</strong><br>
+        CMC Eye Hospital Road, Dinakaran Stopping<br>
+        Vellore, India</p>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>Price</th>
+          <th>Qty</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in bill.billservice_set.all %}
+        <tr>
+          <td>{{ item.service.name }}</td>
+          <td>₹{{ item.price }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>₹{{ item.price|floatformat:2|add:item.quantity|floatformat:2 }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="totals">
+      <div>Subtotal: ₹{{ bill.total_amount }}</div>
+      <div>Tax: ₹20.00</div>
+      <div><strong style="color:#ffb000;">Total: ₹{{ bill.total_amount }}</strong></div>
+    </div>
+
+    <div class="footer">
+      <p>Thank you for your business!</p>
+      <p>info@curatherapycentre.com | www.curatherapycentre.com</p>
+    </div>
+  </div>
+</body>
+</html>

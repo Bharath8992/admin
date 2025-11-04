@@ -1,210 +1,212 @@
-# billing/utils.py - Updated to match your image format
+# billing/utils.py
 from io import BytesIO
-from reportlab.pdfgen import canvas
+from urllib.request import urlopen
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.units import inch, mm
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, Spacer
 from reportlab.lib import colors
-from django.http import HttpResponse
-import os
+from reportlab.platypus import (
+    SimpleDocTemplate, Paragraph, Table, TableStyle, Spacer, Image
+)
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
 
-def generate_pdf(bill):
+
+def generate_pdf(
+    bill,
+    logo_url="https://cura-therapy-center.netlify.app/images/logo.png",
+    scanner_url="https://i.pinimg.com/736x/f6/fb/c4/f6fbc4deadbcc5287d59fff163191cee.jpg",
+    hero_url="https://img.freepik.com/free-vector/green-wave-abstract-background_52683-70245.jpg"
+):
+    """
+    Generates a premium Cura Therapy Centre bill PDF
+    with logo, hero image, scanner/QR, and branded layout.
+    """
+
     buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4, 
-                           topMargin=0.5*inch, 
-                           bottomMargin=0.5*inch,
-                           leftMargin=0.5*inch,
-                           rightMargin=0.5*inch)
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        topMargin=0.5 * inch,
+        bottomMargin=0.5 * inch,
+        leftMargin=0.5 * inch,
+        rightMargin=0.5 * inch,
+    )
+
     styles = getSampleStyleSheet()
-    
-    # Create custom styles matching the image
+
+    # --- Custom Styles ---
     company_style = ParagraphStyle(
         'CompanyStyle',
-        parent=styles['Normal'],
-        fontSize=14,
-        spaceAfter=6,
-        alignment=1,  # Center
+        parent=styles['Heading1'],
+        fontSize=20,
+        alignment=1,
         fontName='Helvetica-Bold',
+        textColor=colors.HexColor("#05652D"),
+        spaceAfter=8
     )
-    
+
     address_style = ParagraphStyle(
         'AddressStyle',
         parent=styles['Normal'],
         fontSize=10,
-        spaceAfter=12,
-        alignment=1,  # Center
+        alignment=1,
+        textColor=colors.HexColor("#333333")
     )
-    
+
     bill_title_style = ParagraphStyle(
         'BillTitleStyle',
-        parent=styles['Normal'],
+        parent=styles['Heading2'],
         fontSize=16,
-        spaceAfter=6,
-        alignment=1,  # Center
+        alignment=1,
         fontName='Helvetica-Bold',
-        textColor=colors.black,
+        textColor=colors.HexColor("#0B8043"),
+        spaceBefore=8,
+        spaceAfter=12
     )
-    
-    bill_subtitle_style = ParagraphStyle(
-        'BillSubtitleStyle',
-        parent=styles['Normal'],
-        fontSize=12,
-        spaceAfter=12,
-        alignment=1,  # Center
-        fontName='Helvetica-Bold',
-    )
-    
-    table_header_style = ParagraphStyle(
-        'TableHeaderStyle',
-        parent=styles['Normal'],
-        fontSize=9,
-        fontName='Helvetica-Bold',
-        alignment=1,  # Center
-    )
-    
+
     table_text_style = ParagraphStyle(
         'TableTextStyle',
         parent=styles['Normal'],
-        fontSize=8,
-        alignment=0,  # Left
-    )
-    
-    table_number_style = ParagraphStyle(
-        'TableNumberStyle',
-        parent=styles['Normal'],
-        fontSize=8,
-        alignment=2,  # Right
-    )
-    
-    notes_style = ParagraphStyle(
-        'NotesStyle',
-        parent=styles['Normal'],
         fontSize=9,
-        alignment=0,  # Left
-        spaceAfter=12,
+        alignment=0
     )
-    
+
     total_style = ParagraphStyle(
         'TotalStyle',
-        parent=styles['Normal'],
+        parent=styles['Heading2'],
         fontSize=14,
         fontName='Helvetica-Bold',
-        alignment=1,  # Center
-        spaceAfter=6,
+        alignment=2,
+        textColor=colors.HexColor("#05652D")
     )
-    
+
     footer_style = ParagraphStyle(
         'FooterStyle',
         parent=styles['Normal'],
         fontSize=8,
-        alignment=1,  # Center
-        textColor=colors.grey,
+        alignment=1,
+        textColor=colors.HexColor("#555555")
     )
-    
-    # Build the PDF content
+
     story = []
-    
-    # Company Header (like in the image)
-    story.append(Paragraph("CURA SPA & WELLNESS", company_style))
-    story.append(Paragraph("123 Business Street<br/>City, State 12345<br/>India", address_style))
-    
-    # Horizontal line
-    story.append(Spacer(1, 6))
-    story.append(Paragraph("<hr/>", styles['Normal']))
-    story.append(Spacer(1, 12))
-    
-    # Bill Title
+
+    # --- Hero Banner (Top Background Image) ---
+    try:
+        hero_stream = urlopen(hero_url)
+        hero_img = Image(hero_stream, width=7.5 * inch, height=1.5 * inch)
+        hero_img.hAlign = 'CENTER'
+        story.append(hero_img)
+        story.append(Spacer(1, 8))
+    except Exception as e:
+        print(f"⚠️ Unable to load hero image: {e}")
+
+    # --- Logo ---
+    try:
+        logo_stream = urlopen(logo_url)
+        logo = Image(logo_stream, width=1.4 * inch, height=1.4 * inch)
+        logo.hAlign = 'CENTER'
+        story.append(logo)
+        story.append(Spacer(1, 10))
+    except Exception as e:
+        print(f"⚠️ Unable to load logo: {e}")
+
+    # --- Company Header ---
+    story.append(Paragraph("Cura Therapy Centre", company_style))
+    story.append(Paragraph(
+        "CMC Eye Hospital Road, Dinakaran Stopping, Opp. New Fresh Market,<br/>"
+        "Near Bajaj Showroom, First Floor Above MedPlus, Arni Road, Vellore",
+        address_style
+    ))
+    story.append(Spacer(1, 15))
+
+    # --- Bill Info ---
     story.append(Paragraph(f"BILL #{bill.bill_number}", bill_title_style))
-    story.append(Paragraph("CURA SPA & WELLNESS", bill_subtitle_style))
     story.append(Paragraph(f"Date: {bill.created_at.strftime('%d-%m-%Y %H:%M')}", address_style))
-    
-    # Customer Information
+    story.append(Spacer(1, 15))
+
+    # --- Customer Info ---
     customer_info = [
-        [Paragraph("<b>Bill To:</b>", table_text_style), 
-         Paragraph(f"{bill.customer.name}<br/>Mobile: {bill.customer.mobile}<br/>Email: {bill.customer.email or 'N/A'}", table_text_style)]
+        ["<b>Bill To:</b>", f"{bill.customer.name}<br/>"
+                            f"Mobile: {bill.customer.mobile}<br/>"
+                            f"Email: {bill.customer.email or 'N/A'}"]
     ]
-    
-    customer_table = Table(customer_info, colWidths=[1.5*inch, 4*inch])
+    customer_table = Table(customer_info, colWidths=[1.5 * inch, 4.5 * inch])
     customer_table.setStyle(TableStyle([
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ('LEFTPADDING', (0, 0), (-1, -1), 6),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 6),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('LINEBELOW', (0, 0), (-1, 0), 0.5, colors.HexColor("#B5D4B2")),
     ]))
-    
     story.append(customer_table)
     story.append(Spacer(1, 15))
-    
-    # Services Table (matching the image format)
-    services_data = [
-        [
-            Paragraph("<b>ITEMS</b>", table_header_style),
-            Paragraph("<b>DESCRIPTION</b>", table_header_style),
-            Paragraph("<b>QUANTITY</b>", table_header_style),
-            Paragraph("<b>PRICE</b>", table_header_style),
-            Paragraph("<b>TAX</b>", table_header_style),
-            Paragraph("<b>AMOUNT</b>", table_header_style)
-        ]
-    ]
-    
+
+    # --- Services Table ---
+    services_data = [['ITEM', 'DESCRIPTION', 'QTY', 'PRICE', 'TAX', 'AMOUNT']]
+
     for bill_service in bill.billservice_set.all():
+        amount = bill_service.price * bill_service.quantity
         services_data.append([
-            Paragraph("Service", table_text_style),
-            Paragraph(bill_service.service.name, table_text_style),
-            Paragraph(str(bill_service.quantity), table_number_style),
-            Paragraph(f"₹{bill_service.price:.2f}", table_number_style),
-            Paragraph("5%", table_number_style),
-            Paragraph(f"₹{(bill_service.price * bill_service.quantity):.2f}", table_number_style)
+            "Service",
+            bill_service.service.name,
+            str(bill_service.quantity),
+            f"₹{bill_service.price:.2f}",
+            "5%",
+            f"₹{amount:.2f}"
         ])
-    
-    services_table = Table(services_data, colWidths=[0.8*inch, 2*inch, 0.6*inch, 0.8*inch, 0.6*inch, 1*inch])
-    services_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+
+    table = Table(
+        services_data,
+        colWidths=[1 * inch, 2.7 * inch, 0.6 * inch, 0.8 * inch, 0.6 * inch, 1 * inch]
+    )
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#05652D")),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#A5CFA0")),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 9),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.white),
-        ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
         ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 8),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-        ('ALIGN', (2, 1), (5, -1), 'RIGHT'),
+        ('ALIGN', (2, 1), (-1, -1), 'RIGHT'),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1),
+         [colors.whitesmoke, colors.HexColor("#F1F8F1")]),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+        ('TOPPADDING', (0, 0), (-1, 0), 8),
     ]))
-    
-    story.append(services_table)
+    story.append(table)
+    story.append(Spacer(1, 25))
+
+    # --- Total Section ---
+    story.append(Paragraph(f"Total: ₹{bill.total_amount:.2f}", total_style))
+    story.append(Spacer(1, 15))
+
+    # --- Notes ---
+    notes_text = (
+        "<b>Thank you for choosing Cura Therapy Centre.</b><br/>"
+        "We appreciate your trust and look forward to serving you again.<br/>"
+        "For queries, contact <b>info@curaspa.com</b> or call +91-98765-43210."
+    )
+    story.append(Paragraph(notes_text, table_text_style))
     story.append(Spacer(1, 20))
-    
-    # Horizontal line
-    story.append(Paragraph("<hr/>", styles['Normal']))
-    story.append(Spacer(1, 15))
-    
-    # Notes Section (like in the image)
-    story.append(Paragraph("<b>NOTES:</b>", notes_style))
-    story.append(Paragraph("Thank you for choosing CURA SPA & WELLNESS. We appreciate your business and look forward to serving you again. For any queries, please contact us at info@curaspa.com.", notes_style))
-    story.append(Spacer(1, 15))
-    
-    # Horizontal line
-    story.append(Paragraph("<hr/>", styles['Normal']))
-    story.append(Spacer(1, 10))
-    
-    # Total Amount
-    story.append(Paragraph(f"<b>₹{bill.total_amount:.2f}</b>", total_style))
-    story.append(Spacer(1, 10))
-    
-    # Horizontal line
-    story.append(Paragraph("<hr/>", styles['Normal']))
-    story.append(Spacer(1, 10))
-    
-    # Footer
-    story.append(Paragraph("Presented by CURA SPA & WELLNESS", footer_style))
-    story.append(Paragraph("The owner and management of CURA SPA & WELLNESS certify that this bill represents the actual services provided and amounts due.", footer_style))
-    
-    # Build PDF
+
+    # --- Scanner / UPI QR Image ---
+    try:
+        scanner_stream = urlopen(scanner_url)
+        scanner_img = Image(scanner_stream, width=2 * inch, height=2 * inch)
+        scanner_img.hAlign = 'CENTER'
+        story.append(scanner_img)
+        story.append(Spacer(1, 8))
+        story.append(Paragraph("Scan to Pay", address_style))
+    except Exception as e:
+        print(f"⚠️ Unable to load scanner image: {e}")
+
+    # --- Footer ---
+    story.append(Spacer(1, 20))
+    story.append(Paragraph("© 2025 Cura Therapy Centre — All Rights Reserved", footer_style))
+    story.append(Paragraph("This is a computer-generated invoice.", footer_style))
+
+    # --- Build PDF ---
     doc.build(story)
-    
     buffer.seek(0)
     return buffer

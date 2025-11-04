@@ -3,10 +3,30 @@
 {% block title %}AdminHub - Service Categories{% endblock %}
 
 {% block content %}
-<div class="container-fluid app">
+<div class=" container-fluid app">
     <!-- Sidebar (same structure) -->
     <aside class="sidebar">
-        <!-- Same sidebar as service_form.html -->
+        <div class="brand">
+            <div class="logo-circle">AH</div>
+            <h4>AdminHub</h4>
+        </div>
+        <ul class="nav-list">
+            <li><a href="{% url 'dashboard' %}" class="nav-link-compact"><i class="fa fa-layer-group"></i> Dashboard</a></li>
+            <li><a href="{% url 'billing:billing' %}" class="nav-link-compact"><i class="fa fa-receipt"></i> Billing</a></li>
+            <li><a href="{% url 'services:service_list' %}" class="nav-link-compact active"><i class="fa fa-concierge-bell"></i> Services</a></li>
+            <li><a href="{% url 'membership_list' %}" class="nav-link-compact"><i class="fa fa-crown"></i> Membership</a></li>
+            <li><a href="" class="nav-link-compact"><i class="fa fa-whatsapp"></i> WhatsApp Ads</a></li>
+            <li><a href="#" class="nav-link-compact"><i class="fa fa-chart-line"></i> Analytics</a></li>
+            <li><a href="#" class="nav-link-compact"><i class="fa fa-cog"></i> Settings</a></li>
+        </ul>
+
+        <span class="small-muted">Account</span>
+        <ul class="nav-list">
+            <li><a href="{% url 'login' %}" class="nav-link-compact"><i class="fa fa-sign-in"></i> Login</a></li>
+            <li><a href="{% url 'register' %}" class="nav-link-compact"><i class="fa fa-user-plus"></i> Register</a></li>
+            <li><a href="{% url 'forgot_password' %}" class="nav-link-compact"><i class="fa fa-key"></i> Forgot Password</a></li>
+        </ul>
+        <a href="{% url 'logout' %}" class="logout" id="logoutBtn"><i class="fa fa-power-off"></i> Logout</a>
     </aside>
 
     <main class="panel">

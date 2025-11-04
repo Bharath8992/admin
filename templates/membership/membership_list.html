@@ -1,167 +1,89 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AdminHub - Membership</title>
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid d-flex p-0">
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <link href="{% static 'css/style.css' %}" rel="stylesheet">
-</head>
-<body>
-    <div class="container-fluid app">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="brand">
-                <div class="logo-circle">AH</div>
-                <h4>AdminHub</h4>
-            </div>
-            <ul class="nav-list">
-                <li><a href="{% url 'dashboard' %}" class="nav-link-compact"><i class="fa fa-layer-group"></i> Dashboard</a></li>
-                <li><a href="" class="nav-link-compact"><i class="fa fa-receipt"></i> Billing</a></li>
-                <li><a href="{% url 'membership' %}" class="nav-link-compact active"><i class="fa fa-crown"></i> Membership</a></li>
-                <li><a href="" class="nav-link-compact"><i class="fa fa-whatsapp"></i> WhatsApp Ads</a></li>
-                <li><a href="#"><i class="fa fa-chart-line"></i> Analytics</a></li>
-                <li><a href="#"><i class="fa fa-cog"></i> Settings</a></li>
-            </ul>
+    <!-- Sidebar -->
+    <aside class="sidebar bg-dark text-white p-3 vh-100">
+        <div class="brand text-center mb-4">
+            <div class="logo-circle bg-primary text-white rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center" style="width:50px; height:50px; font-weight:600;">AH</div>
+            <h4>AdminHub</h4>
+        </div>
 
-            <span class="small-muted">Account</span>
-            <ul class="nav-list">
-                {% if user.is_authenticated %}
-                    <li><a href="{% url 'logout' %}" class="nav-link-compact"><i class="fa fa-power-off"></i> Logout</a></li>
-                {% else %}
-                    <li><a href="{% url 'login' %}" class="nav-link-compact"><i class="fa fa-sign-in"></i> Login</a></li>
-                    <li><a href="{% url 'register' %}" class="nav-link-compact"><i class="fa fa-user-plus"></i> Register</a></li>
-                    <li><a href="{% url 'password_reset' %}" class="nav-link-compact"><i class="fa fa-key"></i> Forgot Password</a></li>
-                {% endif %}
-            </ul>
-        </aside>
+        <ul class="nav flex-column mb-4">
+            <li><a href="{% url 'dashboard' %}" class="nav-link text-white"><i class="fa fa-layer-group me-2"></i>Dashboard</a></li>
+            <li><a href="{% url 'billing:billing' %}" class="nav-link text-white"><i class="fa fa-receipt me-2"></i>Billing</a></li>
+            <li><a href="{% url 'services:service_list' %}" class="nav-link text-white"><i class="fa fa-concierge-bell me-2"></i>Services</a></li>
+            <li><a href="{% url 'membership_list' %}" class="nav-link text-white active"><i class="fa fa-crown me-2"></i>Membership</a></li>
+            <li><a href="#" class="nav-link text-white"><i class="fa fa-whatsapp me-2"></i>WhatsApp Ads</a></li>
+            <li><a href="#" class="nav-link text-white"><i class="fa fa-chart-line me-2"></i>Analytics</a></li>
+            <li><a href="#" class="nav-link text-white"><i class="fa fa-cog me-2"></i>Settings</a></li>
+        </ul>
+    </aside>
 
-        <!-- Main Content -->
-        <main class="panel">
-            <header class="topbar">
-                <div class="d-flex align-items-center gap-2 flex-wrap">
-                    <button id="toggleSidebar" class="btn btn-outline-secondary d-lg-none"><i class="fa fa-bars"></i></button>
-                    <div class="searchbox">
-                        <i class="fa fa-search text-muted"></i>
-                        <input type="text" placeholder="Search..." />
+    <!-- Main Content -->
+    <main class="flex-grow-1 p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3>Membership List</h3>
+            <a href="{% url 'membership_add' %}" class="btn btn-primary">Add New Membership</a>
+        </div>
+
+        <table class="table table-bordered table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Price</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for membership in memberships %}
+                <tr>
+                    <td>{{ membership.full_name }}</td>
+                    <td>{{ membership.email }}</td>
+                    <td>{{ membership.get_membership_type_display }}</td>
+                    <td>{{ membership.status }}</td>
+                    <td>{{ membership.price }}</td>
+                    <td>
+                        <a href="{% url 'membership_detail' membership.id %}" class="btn btn-info btn-sm">View</a>
+                        <a href="{% url 'membership_edit' membership.id %}" class="btn btn-warning btn-sm">Edit</a>
+                        <!-- Trigger delete modal -->
+                        <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ membership.id }}">Delete</button>
+                    </td>
+                </tr>
+
+                <!-- Delete Confirmation Modal -->
+                <div class="modal fade" id="deleteModal{{ membership.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ membership.id }}" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                      <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="deleteModalLabel{{ membership.id }}"><i class="fa fa-exclamation-triangle me-2"></i>Delete Membership</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        Are you sure you want to delete <strong>{{ membership.full_name }}</strong>?
+                      </div>
+                      <div class="modal-footer">
+                        <form method="post" action="{% url 'membership_delete' membership.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                        </form>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                      </div>
                     </div>
+                  </div>
                 </div>
-                <div class="d-flex align-items-center gap-3 flex-wrap">
-                    {% if user.is_authenticated %}
-                        <div class="avatar">
-                            {{ user.first_name|default:user.username|slice:":2"|upper }}
-                        </div>
-                    {% endif %}
-                </div>
-            </header>
+                {% empty %}
+                <tr><td colspan="6" class="text-center">No memberships found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+</div>
 
-            <section class="membership-section">
-                <div class="dashboard-title">
-                    <h1>Membership</h1>
-                    <div class="breadcrumb">Dashboard &nbsp;›&nbsp; Membership</div>
-                </div>
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-                <div class="panel-card">
-                    <h5 class="fw-bold mb-3">Membership Management</h5>
-                    
-                    <div class="row mb-4">
-                        <!-- Membership Offer Section -->
-                        <div class="col-md-6">
-                            <div class="membership-card">
-                                <div class="membership-badge">PREMIUM</div>
-                                <h4>Premium Membership</h4>
-                                <p class="text-muted">Unlock exclusive benefits and discounts</p>
-                                <ul class="list-unstyled">
-                                    <li><i class="fa fa-check text-success me-2"></i> 20% discount on all services</li>
-                                    <li><i class="fa fa-check text-success me-2"></i> Priority booking</li>
-                                    <li><i class="fa fa-check text-success me-2"></i> Free monthly facial</li>
-                                    <li><i class="fa fa-check text-success me-2"></i> Exclusive WhatsApp offers</li>
-                                </ul>
-                                <button class="btn btn-success mt-3">Upgrade to Premium</button>
-                            </div>
-                        </div>
-
-                        <!-- Add / Manage Membership -->
-                        <div class="col-md-6">
-                            <div class="membership-card">
-                                <h4>User Management</h4>
-                                <a href="{% url 'membership_add' %}" class="btn btn-primary mt-2">
-                                    <i class="fa fa-user-plus me-1"></i> Add Member
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <h5 class="fw-bold mb-3">Membership Users</h5>
-                    <table class="table recent-table align-middle">
-                        <thead>
-                            <tr>
-                                <th>User</th>
-                                <th>Email</th>
-                                <th>Membership</th>
-                                <th>Join Date</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for m in memberships %}
-                            <tr>
-                                <td>
-                                    <div class="recent-user">
-                                        <div class="uimg">
-                                            {{ m.user.first_name|slice:":1" }}{{ m.user.last_name|slice:":1" }}
-                                        </div>
-                                        <span>{{ m.user.get_full_name|default:m.user.username }}</span>
-                                    </div>
-                                </td>
-                                <td>{{ m.user.email }}</td>
-                                <td>
-                                    {% if m.membership_type == 'premium' %}
-                                        <span class="status-pill status-completed">Premium</span>
-                                    {% elif m.membership_type == 'vip' %}
-                                        <span class="status-pill status-warning">VIP</span>
-                                    {% else %}
-                                        <span class="status-pill status-pending">Basic</span>
-                                    {% endif %}
-                                </td>
-                                <td>{{ m.join_date|date:"d-m-Y" }}</td>
-                                <td>
-                                    <a href="{% url 'membership_edit' m.id %}" class="btn btn-sm btn-outline-primary">
-                                        <i class="fa fa-edit"></i> Edit
-                                    </a>
-                                    <a href="{% url 'membership_delete' m.id %}" 
-                                       class="btn btn-sm btn-outline-danger"
-                                       onclick="return confirm('Are you sure you want to delete this membership?');">
-                                        <i class="fa fa-trash"></i> Delete
-                                    </a>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="5" class="text-center text-muted">No members found.</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <footer>
-                <span class="text-muted small">© AdminHub • All rights reserved</span>
-                <div>
-                    <a href="#" class="text-primary fw-semibold text-decoration-none me-2">Support</a>
-                    <a href="#" class="text-primary fw-semibold text-decoration-none">Docs</a>
-                </div>
-            </footer>
-        </main>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{% static 'js/membership.js' %}"></script>
-    <script src="{% static 'js/main.js' %}"></script>
-</body>
-</html>
+{% endblock %}

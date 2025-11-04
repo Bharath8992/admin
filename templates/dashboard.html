@@ -2,17 +2,65 @@
 
 {% block title %}AdminHub - Dashboard{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* Enhanced mobile sidebar styles */
+    @media (max-width: 991px) {
+        aside.sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            z-index: 1000;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+            border-radius: 0;
+        }
+        
+        aside.sidebar.show {
+            transform: translateX(0);
+        }
+        
+        /* Overlay styles */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            backdrop-filter: blur(2px);
+            display: none;
+        }
+        
+        .sidebar-overlay.show {
+            display: block;
+        }
+        
+        /* Prevent body scroll when sidebar is open */
+        body.sidebar-open {
+            overflow: hidden;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
+<!-- Overlay for mobile -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
 <div class="container-fluid app">
     <!-- Sidebar -->
     <aside class="sidebar">
         <div class="brand">
             <div class="logo-circle">AH</div>
             <h4>AdminHub</h4>
+            <button class="btn-close d-lg-none ms-auto" id="closeSidebar"></button>
         </div>
         <ul class="nav-list">
             <li><a href="{% url 'dashboard' %}" class="nav-link-compact active"><i class="fa fa-layer-group"></i> Dashboard</a></li>
-            {% comment %} <li><a href="{% url 'billing' %}" class="nav-link-compact"><i class="fa fa-receipt"></i> Billing</a></li> {% endcomment %}
             <li><a href="{% url 'billing:billing' %}" class="nav-link-compact"><i class="fa fa-receipt"></i> Billing</a></li>
             <li><a href="" class="nav-link-compact"><i class="fa fa-crown"></i> Membership</a></li>
             <li><a href="" class="nav-link-compact"><i class="fa fa-whatsapp"></i> WhatsApp Ads</a></li>
@@ -33,7 +81,9 @@
     <main class="panel">
         <header class="topbar">
             <div class="d-flex align-items-center gap-2 flex-wrap">
-                <button id="toggleSidebar" class="btn btn-outline-secondary d-lg-none"><i class="fa fa-bars"></i></button>
+                <button id="toggleSidebar" class="btn btn-outline-secondary d-lg-none mobile-toggle">
+                    <i class="fa fa-bars"></i>
+                </button>
                 <div class="searchbox">
                     <i class="fa fa-search text-muted"></i>
                     <input type="text" placeholder="Search..." />
@@ -103,4 +153,95 @@
         </footer>
     </main>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleBtn = document.getElementById('toggleSidebar');
+    const closeBtn = document.getElementById('closeSidebar');
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    
+    console.log('Mobile menu initialized');
+    console.log('Toggle button:', toggleBtn);
+    console.log('Sidebar:', sidebar);
+    console.log('Overlay:', overlay);
+
+    // Function to open sidebar
+    function openSidebar() {
+        if (sidebar) {
+            sidebar.classList.add('show');
+        }
+        if (overlay) {
+            overlay.classList.add('show');
+        }
+        document.body.classList.add('sidebar-open');
+    }
+
+    // Function to close sidebar
+    function closeSidebar() {
+        if (sidebar) {
+            sidebar.classList.remove('show');
+        }
+        if (overlay) {
+            overlay.classList.remove('show');
+        }
+        document.body.classList.remove('sidebar-open');
+    }
+
+    // Toggle sidebar
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Toggle button clicked');
+            openSidebar();
+        });
+    }
+
+    // Close sidebar with close button
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Close button clicked');
+            closeSidebar();
+        });
+    }
+
+    // Close sidebar when clicking on overlay
+    if (overlay) {
+        overlay.addEventListener('click', function() {
+            console.log('Overlay clicked');
+            closeSidebar();
+        });
+    }
+
+    // Close sidebar when clicking on navigation links (mobile)
+    const navLinks = document.querySelectorAll('.nav-link-compact');
+    navLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            if (window.innerWidth <= 991) {
+                console.log('Nav link clicked, closing sidebar');
+                closeSidebar();
+            }
+        });
+    });
+
+    // Close sidebar on window resize
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 991) {
+            closeSidebar();
+        }
+    });
+
+    // Close sidebar with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeSidebar();
+        }
+    });
+});
+</script>
 {% endblock %}
